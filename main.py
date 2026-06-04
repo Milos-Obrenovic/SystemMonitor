@@ -1,5 +1,5 @@
 # if you don't have the required libraries, comment line 2 out
-# %pip install pandas psutil
+# %pip install psutil
 
 from dataclasses import dataclass
 import psutil
