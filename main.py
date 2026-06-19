@@ -1,15 +1,6 @@
-# if you don't have the required libraries, comment line 2 out
-# %pip install psutil
-
-from dataclasses import dataclass
 import psutil
 import os
 
-@dataclass
-class OSData:
-    identifier: str
-    name: str
-    disk_path: str
 DATA = {
     "nt": {
         "name": "Windows",
@@ -21,42 +12,35 @@ DATA = {
     }
 }
 
-DATA = {k: OSData(identifier=k, **v) for k, v in DATA.items()}
-
-class SystemMonitor:
+class GetProcessor:
     def __init__(self):
-        self.os_data = DATA[os.name]
-
-    def get_cpu_usage(self) -> float:
-        return psutil.cpu_percent(interval=1)
-
-    def get_memory_usage(self) -> float:
-        mem = psutil.virtual_memory()
-        return mem.percent
-
-    def get_disk_usage(self) -> float:
-        disk = psutil.disk_usage(self.os_data.disk_path)
-        return disk.percent
-
-    def __str__(self) -> str:
-        return f"""System Monitor for OS: {self.os_data.name}
-CPU Usage: {self.get_cpu_usage()}%
-Memory Usage: {self.get_memory_usage()}%
-Disk Usage: {self.get_disk_usage()}%"""
+        self.processor_percent = psutil.cpu_percent(interval=1)
+    def __str__(self):
+        return f"{self.processor_percent:.2f}"
     
-    def __dict__(self) -> dict:
-        return {
-            "os": self.os_data.name,
-            "cpu_usage": self.get_cpu_usage(),
-            "memory_usage": self.get_memory_usage(),
-            "disk_usage": self.get_disk_usage()
-        }
+class GetMemory:
+    def __init__(self):
+        memory = psutil.virtual_memory()
+        self.memory_percent = memory.percent
+    def __str__(self):
+        return f"{self.memory_percent:.2f}"
 
+class GetDisk:
+    def __init__(self):
+        kernel = os.name
+        disk_path = DATA.get(kernel, "posix")["disk_path"]
+        disk = psutil.disk_usage(disk_path)
 
+        disk_used = disk.used / (1024 ** 3)
+        disk_total = disk.total / (1024 ** 3)
+
+        self.disk_percent = disk_used / disk_total * 100
+    def __str__(self):
+        return f"{self.disk_percent:.2f}"
+    
 if __name__ == "__main__":
-    system_monitor = SystemMonitor()
-    print(system_monitor.get_cpu_usage())
-    print(system_monitor.get_memory_usage())
-    print(system_monitor.get_disk_usage())
-    print(system_monitor)
-    print(system_monitor.__dict__())
+    processor = GetProcessor()
+    memory = GetMemory()
+    disk = GetDisk()
+
+    print(f"CPU: {processor}%\nRAM: {memory}%\nDisk used: {disk}%")
