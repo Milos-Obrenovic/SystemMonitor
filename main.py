@@ -1,15 +1,9 @@
 import psutil
 import os
 
-DATA = {
-    "nt": {
-        "name": "Windows",
-        "disk_path": "C:\\",
-    },
-    "posix": {
-        "name": "Unix-based or Unix-like",
-        "disk_path": "/"
-    }
+DATA = { 
+    "nt": "C:\\", # Windows XP or up
+    "posix": "/"  # Unix-like or Unix-based
 }
 
 class GetProcessor:
@@ -28,7 +22,7 @@ class GetMemory:
 class GetDisk:
     def __init__(self):
         kernel = os.name
-        disk_path = DATA.get(kernel, "posix")["disk_path"]
+        disk_path = DATA.get(kernel, "posix")
         disk = psutil.disk_usage(disk_path)
 
         disk_used = disk.used / (1024 ** 3)
@@ -43,4 +37,4 @@ if __name__ == "__main__":
     memory = GetMemory()
     disk = GetDisk()
 
-    print(f"CPU: {processor}%\nRAM: {memory}%\nDisk used: {disk}%")
+    print(f"CPU: {processor}%\nRAM: {memory}%\nDisk: {disk}%")
